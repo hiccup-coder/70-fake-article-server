@@ -1,44 +1,52 @@
 
 from github import Github
 import base64
+import re
+import os
 
-# -----------------------------
-# STEP 1: Set your credentials
-# -----------------------------
-GITHUB_TOKEN = "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"   # 🔐 Replace this with your actual PAT
-REPO_NAME = "TrustFakeDev/TrustArticle"         # e.g. "johnsmith/my-blog"
-BRANCH = "main"                               # or 'master'
-FILE_PATH = "article/test.txt"            # File path in repo
-COMMIT_MESSAGE = "Add new file via script"
-FILE_CONTENT = "This is the content of the file being pushed."
+from dotenv import load_dotenv
+load_dotenv()
 
-# -----------------------------
-# STEP 2: Authenticate & Access Repo
-# -----------------------------
-g = Github(GITHUB_TOKEN)
-repo = g.get_repo(REPO_NAME)
+class GithubManager:
 
-# -----------------------------
-# STEP 3: Check if file exists
-# -----------------------------
-try:
-    contents = repo.get_contents(FILE_PATH, ref=BRANCH)
-    print("❗File already exists. Updating...")
-    repo.update_file(
-        path=FILE_PATH,
-        message=COMMIT_MESSAGE,
-        content=FILE_CONTENT,
-        sha=contents.sha,
-        branch=BRANCH,
-    )
-    print("✅ File updated successfully.")
-except Exception as e:
-    print("📁 File does not exist. Creating new...")
-    repo.create_file(
-        path=FILE_PATH,
-        message=COMMIT_MESSAGE,
-        content=FILE_CONTENT,
-        branch=BRANCH,
-    )
-    print("✅ File created and committed.")
+    def __init__(self):
+        self.GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") # 🔐 Replace this with your actual PAT
+        self.REPO_NAME = os.environ.get("REPO_NAME") 
+        self.BRANCH = "main"
+        self.COMMIT_MESSAGE = "Add new file via script"
 
+        self.g = Github(self.GITHUB_TOKEN)
+        self.repo = self.g.get_repo(self.REPO_NAME)
+        self.curr_index = 0
+
+    def push_content(self, title: str, content: str):
+
+        trim_title = title.strip()
+        prefix = trim_title[0:30] if len(trim_title) > 30 else trim_title
+        prefix = re.sub(r"\s+", "", prefix)
+
+        file_path = f"article/{prefix}{self.curr_index}.md"
+        self.curr_index += 1
+
+        try:
+            contents = self.repo.get_contents(file_path, ref=self.BRANCH)
+            print("❗File already exists. Updating...")
+            self.repo.update_file(
+                path=file_path,
+                message=self.COMMIT_MESSAGE,
+                content=content,
+                sha=contents.sha,
+                branch=self.BRANCH,
+            )
+            print("✅ File updated successfully.")
+        except Exception as e:
+            print("📁 File does not exist. Creating new...")
+            self.repo.create_file(
+                path=file_path,
+                message=self.COMMIT_MESSAGE,
+                content=content,
+                branch=self.BRANCH,
+            )
+            print("✅ File created and committed.")
+
+        return f"https://raw.githubusercontent.com/TrustFakeDev/TrustArticle/main/{file_path}"
