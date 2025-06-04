@@ -1,8 +1,13 @@
 
-from generate_article import GenerateArticle
-from submit_github import GithubManager
-import requests
+import os
 import re
+import requests
+from starlette.requests import Request
+from fastapi import FastAPI, HTTPException
+import uvicorn
+
+from submit_github import GithubManager
+from generate_article import GenerateArticle
 
 def normalize_text(text):
     # Remove patterns like [ 1 ], [12], [ 123 ]
@@ -39,7 +44,7 @@ class ArticleServer:
         article = "Title: " + data["contradiction"] + "\n" + data["article"] 
         url = self.github.push_content(statement, article)
         
-        if True:
+        if False:
             response = requests.get(url)
 
             if response.status_code == 200:
@@ -64,11 +69,39 @@ class ArticleServer:
         return data["contradiction"], url
 
 
-statement = "The leafcutter ant can carry up to 50 times its own body weight when transporting leaves back to its nest, showcasing its incredible strength and cooperative foraging behavior."
+# def test_code():
+#     statement = "The leafcutter ant can carry up to 50 times its own body weight when transporting leaves back to its nest, showcasing its incredible strength and cooperative foraging behavior."
+
+#     articleserver = ArticleServer()
+
+#     for i in range(5):
+        
+#         contradiction, url = articleserver.generate(statement)
+#         print(f"----------------------\n contradiction:\n {contradiction}, \n\n url:\n {url}")
+
 
 articleserver = ArticleServer()
 
-for i in range(5):
-    
+app = FastAPI()
+@app.post("/post_article")
+async def post_article(request: Request):
+
+    data = await request.json()
+    statement = data.get("statement")
+    print("Receive-----------statement")
+
     contradiction, url = articleserver.generate(statement)
+
     print(f"----------------------\n contradiction:\n {contradiction}, \n\n url:\n {url}")
+
+    return {
+        "contradiction": contradiction,
+        "url": url
+    }
+
+if __name__ == "__main__":
+    print("server is running")
+    # uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("SERVER_PORT", "5050")))
+    uvicorn.run(app, host="135.181.168.132", port=int(os.getenv("SERVER_PORT", "5050")))
+
+# pm2 start main.py --name fakearticle
