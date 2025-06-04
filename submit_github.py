@@ -19,6 +19,29 @@ class GithubManager:
         self.repo = self.g.get_repo(self.REPO_NAME)
         self.curr_index = 0
 
+    def check_exist_content(self, title: str):
+        trim_title = title.strip()
+        prefix = trim_title[0:30] if len(trim_title) > 30 else trim_title
+        prefix = re.sub(r"\s+", "", prefix)
+
+        file_path = f"article/{prefix}{self.curr_index}.md"
+        self.curr_index += 1
+
+        content = ""
+        url = ""
+
+        try:
+            contents = self.repo.get_contents(file_path, ref=self.BRANCH)
+            print(contents)
+
+            url = f"https://raw.githubusercontent.com/TrustFakeDev/TrustArticle/main/{file_path}"
+
+        except Exception as e:
+            print("📁 File does not exist")
+        
+        return content, url
+
+
     def push_content(self, title: str, content: str):
 
         trim_title = title.strip()

@@ -27,30 +27,39 @@ class ArticleServer:
 
     def generate(self, statement):
         
+        ## check exist
+        # content, url = self.github.check_exist_content(statement)
+        # if content != "" and url != "":
+            # return content, url
+
+        # generate one
         data = self.generate_article.generate(statement)
         # print(f"data-----{data}")
 
         article = "Title: " + data["contradiction"] + "\n" + data["article"] 
         url = self.github.push_content(statement, article)
         
-        # response = requests.get(url)
+        if True:
+            response = requests.get(url)
 
-        # if response.status_code == 200:
-        #     #print(response.text)  # This is the actual markdown content
-        #     text = normalize_text(response.text)
-        #     para = normalize_text(data["contradiction"])
-        #     print("*****---------------")
-        #     print(f"para ori: {data["contradiction"]}")
-        #     print("---------------")
-        #     print(f"para: {para}")
-        #     print("---------------")
-        #     print(f"text: {text}")
+            if response.status_code == 200:
+                #print(response.text)  # This is the actual markdown content
+                text = normalize_text(response.text)
+                para = normalize_text(data["contradiction"])
+                # print("*****---------------")
+                # print(f"para ori: {data["contradiction"]}")
+                # print("---------------")
+                # print(f"para: {para}")
+                # print("---------------")
+                # print(f"text: {text}")
 
-        #     print(f"checking --- ")
-        #     if para in text:
-        #         print("paragraph in content")
-        # else:
-        #     print("Failed to fetch file:", response.status_code)
+                # print(f"checking --- ")
+                if para in text:
+                    print("✅ paragraph in content")
+                else:
+                    print("❗ paragraph not in content")
+            else:
+                print("Failed to fetch file:", response.status_code)
 
         return data["contradiction"], url
 
@@ -60,5 +69,6 @@ statement = "The leafcutter ant can carry up to 50 times its own body weight whe
 articleserver = ArticleServer()
 
 for i in range(5):
+    
     contradiction, url = articleserver.generate(statement)
-    print(f"{contradiction}, {url}")
+    print(f"----------------------\n contradiction:\n {contradiction}, \n\n url:\n {url}")
