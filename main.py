@@ -104,4 +104,25 @@ if __name__ == "__main__":
     # uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("SERVER_PORT", "5050")))
     uvicorn.run(app, host="135.181.168.132", port=int(os.getenv("SERVER_PORT", "5050")))
 
+# ----------------------------------------------
 # pm2 start main.py --name fakearticle
+
+# ----------------------------------------------
+# import requests
+
+# # Define the URL of your FastAPI endpoint
+# url = "http://localhost:8000/post_article"
+
+# # Data to send in the request body
+# payload = {
+#     "statement": "The Earth is flat."
+# }
+
+# # Send the POST request
+# response = requests.post(url, json=payload)
+
+# # Check the status code and print the response
+# if response.status_code == 200:
+#     print("Response JSON:", response.json())
+# else:
+#     print("Request failed:", response.status_code, response.text) 
